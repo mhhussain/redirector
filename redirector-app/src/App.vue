@@ -1,60 +1,67 @@
 <template>
-  <v-app>
-    <v-app-bar
-      app
-      color="primary"
-      dark
-    >
-      <div class="d-flex align-center">
-        <v-img
-          alt="Vuetify Logo"
-          class="shrink mr-2"
-          contain
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.png"
-          transition="scale-transition"
-          width="40"
-        />
-
-        <v-img
-          alt="Vuetify Name"
-          class="shrink mt-1 hidden-sm-and-down"
-          contain
-          min-width="100"
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-name-dark.png"
-          width="100"
-        />
-      </div>
-
-      <v-spacer></v-spacer>
-
-      <v-btn
-        href="https://github.com/vuetifyjs/vuetify/releases/latest"
-        target="_blank"
-        text
-      >
-        <span class="mr-2">Latest Release</span>
-        <v-icon>mdi-open-in-new</v-icon>
-      </v-btn>
-    </v-app-bar>
-
+  <v-app id="app">
     <v-main>
-      <HelloWorld/>
+      <v-container class="main">
+        <v-card>
+          <v-card-title>
+            Redirector
+          </v-card-title>
+          <v-divider class="mx-4"></v-divider>
+          <v-card-text>
+            <v-text-field label="data" v-model="data" />
+            <v-text-field label="secret" v-model="secret" />
+            <v-text-field label="salt" v-model="salt" />
+            <v-text-field label="return url" v-model="returnUrl" />
+            <v-btn color="primary" @click="redirect()">Go</v-btn>
+          </v-card-text>
+          <v-divider></v-divider>
+          <v-card-text>
+            <div>
+              Encrypted data:
+            </div>
+            {{ encrypted }}
+          </v-card-text>
+        </v-card>
+      </v-container>
     </v-main>
   </v-app>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue';
+import itsencrypt from './its-encryption';
 
 export default {
   name: 'App',
-
-  components: {
-    HelloWorld,
-  },
-
+  components: {},
   data: () => ({
-    //
+    data: '',
+    secret: '',
+    salt: '',
+    returnUrl: '',
   }),
+  computed: {
+    encrypted() {
+      return itsencrypt(this.data, this.secret, this.salt);
+    },
+  },
+  async created() {
+    this.returnUrl = this.$route.query.returnUrl;
+  },
+  methods: {
+    redirect() {
+      window.location.replace(`${this.returnUrl}?tk=${itsencrypt(this.secret, this.secret, this.salt)}&dt=${itsencrypt(this.data, this.secret, this.salt)}`);
+    },
+  },
 };
 </script>
+
+<style scoped>
+.main {
+  width: 350px;
+  min-width: 25vw;
+}
+
+.v-btn {
+  width: 100%
+}
+</style>
